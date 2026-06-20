@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Contact Finder Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    background:#0f172a;
+    min-height:100vh;
+    color:white;
+    padding:20px;
+    overflow-x:hidden;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:#2563eb;
+    border-radius:50%;
+    filter:blur(200px);
+    top:-250px;
+    left:-200px;
+    opacity:.3;
+}
+
+body::after{
+    content:'';
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:#7c3aed;
+    border-radius:50%;
+    filter:blur(200px);
+    bottom:-250px;
+    right:-200px;
+    opacity:.25;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    position:relative;
+    z-index:2;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.header h1{
+    font-size:42px;
+    font-weight:800;
+}
+
+.header p{
+    color:#94a3b8;
+    margin-top:8px;
+}
+
+.glass{
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(18px);
+    border-radius:20px;
+}
+
+.import-box{
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.import-box h3{
+    margin-bottom:12px;
+}
+
+textarea{
+    width:100%;
+    height:180px;
+    resize:none;
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:15px;
+    padding:15px;
+    color:white;
+    outline:none;
+}
+
+textarea:focus{
+    border-color:#3b82f6;
+}
+
+.btn{
+    border:none;
+    cursor:pointer;
+    padding:12px 18px;
+    border-radius:12px;
+    color:white;
+    font-weight:600;
+    transition:.3s;
+}
+
+.import-btn{
+    background:#2563eb;
+    margin-top:12px;
+}
+
+.import-btn:hover{
+    transform:translateY(-2px);
+}
+
+.search-box{
+    padding:15px;
+    margin-bottom:15px;
+}
+
+.search-box input{
+    width:100%;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:white;
+    font-size:16px;
+}
+
+.stats{
+    color:#cbd5e1;
+    margin-bottom:15px;
+}
+
+.card{
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(18px);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:15px;
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    border-color:#3b82f6;
+    box-shadow:0 10px 35px rgba(59,130,246,.15);
+}
+
+.top{
+    display:flex;
+    gap:15px;
+    align-items:center;
+}
+
+.avatar{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.name{
+    font-size:18px;
+    font-weight:700;
+}
+
+.number{
+    color:#94a3b8;
+    margin-top:4px;
+}
+
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:15px;
+}
+
+.copy{
+    background:#2563eb;
+}
+
+.wa{
+    background:#16a34a;
+}
+
+.actions button:hover{
+    opacity:.9;
+}
+
+.empty{
+    text-align:center;
+    padding:40px;
+    color:#94a3b8;
+}
+
+@media(max-width:768px){
+
+.header h1{
+    font-size:30px;
+}
+
+.actions{
+    flex-direction:column;
+}
+
+.actions button{
+    width:100%;
+}
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>CONTACT FINDER PRO</h1>
+        <p>Import Data • Cari Nomor • Copy • WhatsApp</p>
+    </div>
+
+    <div class="glass import-box">
+
+        <h3>📥 Import Database</h3>
+
+        <textarea id="database"
+placeholder="Contoh:
+
+6288212055138 Dafa Nur Fauzan
+6288212047396 Dika Sagita
+6288212145789 Gunawan"></textarea>
+
+        <button class="btn import-btn" onclick="importData()">
+            Import Data
+        </button>
+
+    </div>
+
+    <div class="glass search-box">
+        <input type="text" id="search"
+        placeholder="🔍 Cari nama, nomor, atau 4 digit terakhir">
+    </div>
+
+    <div class="stats" id="stats">
+        Total Data : 0
+    </div>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+
+let contacts = [];
+
+function importData(){
+
+    const raw =
+    document.getElementById("database")
+    .value
+    .trim();
+
+    if(!raw){
+        alert("Masukkan data terlebih dahulu");
+        return;
+    }
+
+    contacts = [];
+
+    const lines = raw.split("\n");
+
+    lines.forEach(line=>{
+
+        line = line.trim();
+
+        if(!line) return;
+
+        const parts = line.split(" ");
+
+        const nomor = parts.shift();
+
+        const nama = parts.join(" ");
+
+        contacts.push({
+            nomor,
+            nama
+        });
+
+    });
+
+    render(contacts);
+
+    alert(
+        contacts.length +
+        " data berhasil diimport"
+    );
+
+}
+
+function render(data){
+
+    document.getElementById("stats")
+    .innerHTML =
+    `Total Data : <b>${data.length}</b>`;
+
+    const result =
+    document.getElementById("result");
+
+    if(data.length === 0){
+
+        result.innerHTML =
+        `<div class="empty">
+            Data tidak ditemukan
+        </div>`;
+
+        return;
+    }
+
+    let html = "";
+
+    data.forEach(item=>{
+
+        html += `
+
+        <div class="card">
+
+            <div class="top">
+
+                <div class="avatar">
+                    👤
+                </div>
+
+                <div>
+
+                    <div class="name">
+                        ${item.nama}
+                    </div>
+
+                    <div class="number">
+                        ${item.nomor}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="actions">
+
+                <button
+                class="btn copy"
+                onclick="copyText('${item.nama}')">
+                📋 Copy Nama
+                </button>
+
+                <button
+                class="btn copy"
+                onclick="copyText('${item.nomor}')">
+                📞 Copy Nomor
+                </button>
+
+                <button
+                class="btn wa"
+                onclick="openWA('${item.nomor}')">
+                💬 WhatsApp
+                </button>
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    result.innerHTML = html;
+
+}
+
+function copyText(text){
+
+    navigator.clipboard.writeText(text);
+
+    alert("Berhasil disalin");
+
+}
+
+function openWA(nomor){
+
+    window.open(
+        'https://wa.me/' + nomor,
+        '_blank'
+    );
+
+}
+
+document
+.getElementById("search")
+.addEventListener("input",function(){
+
+    const keyword =
+    this.value.toLowerCase().trim();
+
+    const filtered =
+    contacts.filter(item=>
+
+        item.nama.toLowerCase().includes(keyword)
+
+        ||
+
+        item.nomor.includes(keyword)
+
+        ||
+
+        item.nomor.endsWith(keyword)
+
+    );
+
+    render(filtered);
+
+});
+
+</script>
+
+</body>
+</html>
